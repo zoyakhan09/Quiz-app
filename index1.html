@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .timer, .score, .question-number {
+            margin-bottom: 10px;
+        }
+
+        .question {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .options button {
+            margin-bottom: 10px;
+        }
+
+        #submit-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #submit-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Quiz Application</h1>
+            <div class="timer">Timer: <span id="timer">10</span> seconds</div>
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="question-number">Question <span id="question-number">1</span></div>
+        </div>
+        <div class="question" id="question">Question goes here</div>
+        <div class="options" id="options">
+            <!-- Options will be dynamically added here -->
+        </div>
+        <div class="feedback" id="feedback"></div>
+        <button id="submit-btn">Submit</button>
+    </div>
+
+    <script>
+        // Quiz data
+        const quizData = [
+            {
+                question: "What is the capital of France?",
+                options: ["Paris", "London", "Berlin", "Madrid"],
+                answer: "Paris"
+            },
+            {
+                question: "What is 2+2?",
+                options: ["3", "4", "5", "6"],
+                answer: "4"
+            },
+            {
+                question: "Which is the procedural language'?",
+                options: ["C", "JAVA", "python", "HTML"],
+                answer: "C"
+            },
+            {
+                question: "What is the tallest mammal?",
+                options: ["Elephant", "Giraffe", "Whale", "Kangaroo"],
+                answer: "Giraffe"
+            },
+            {
+                question: "What is the chemical symbol for water?",
+                options: ["H2O", "CO2", "O2", "N2"],
+                answer: "H2O"
+            },
+            {
+                question: "Which planet is known as the Red Planet?",
+                options: ["Earth", "Mars", "Venus", "Jupiter"],
+                answer: "Mars"
+            },
+            {
+                question: "Who painted the Mona Lisa?",
+                options: ["Leonardo da Vinci", "Pablo Picasso", "Vincent van Gogh", "Claude Monet"],
+                answer: "Leonardo da Vinci"
+            },
+            {
+                question: "What is the largest organ in the human body?",
+                options: ["Brain", "Heart", "Skin", "Liver"],
+                answer: "Skin"
+            },
+            {
+                question: "What is the currency of Japan?",
+                options: ["Yuan", "Euro", "Dollar", "Yen"],
+                answer: "Yen"
+            },
+            {
+                question: "What is the national animal of India?",
+                options: ["Tiger", "Elephant", "Lion", "Leopard"],
+                answer: "Tiger"
+            }
+        ];
+
+        // DOM elements
+        const questionElement = document.getElementById('question');
+        const optionsElement = document.getElementById('options');
+        const submitButton = document.getElementById('submit-btn');
+        const timerElement = document.getElementById('timer');
+        const scoreElement = document.getElementById('score');
+        const questionNumberElement = document.getElementById('question-number');
+        const feedback = document.getElementById('feedback');
+
+        // Quiz state
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timeLeft = 10; // Initial time for each question in seconds
+        let timerInterval;
+
+        // Function to start the quiz
+        function startQuiz() {
+            displayQuestion();
+            startTimer();
+        }
+
+        // Function to display current question
+        function displayQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionElement.textContent = currentQuestion.question;
+            optionsElement.innerHTML = ''; // Clear previous options
+
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option;
+                button.addEventListener('click', () => selectOption(option));
+                optionsElement.appendChild(button);
+            });
+
+            questionNumberElement.textContent = currentQuestionIndex + 1;
+        }
+
+        // Function to handle option selection
+        function selectOption(option) {
+            const currentQuestion = quizData[currentQuestionIndex];
+            if (option === currentQuestion.answer) {
+                score++;
+                document.getElementById('feedback').textContent = 'Correct!';
+            }else {
+                document.getElementById('feedback').textContent = 'Incorrect!';
+            }
+            scoreElement.textContent = score;
+            disableOptions();
+        }
+
+        // Function to disable option buttons after selection
+        function disableOptions() {
+            const optionButtons = optionsElement.querySelectorAll('button');
+            optionButtons.forEach(button => button.disabled = true);
+        }
+
+        // Function to start timer
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    // Handle time out
+                    moveNext();
+                }
+            }, 1000);
+        }
+
+        // Function to move to the next question
+        function moveNext() {
+            clearInterval(timerInterval); // Clear the timer interval
+            currentQuestionIndex++; // Move to the next question
+            if (currentQuestionIndex < quizData.length) { // Check if there are more questions
+                timeLeft = 10; // Reset timer for next question
+                startQuiz(); // Display the next question
+            } else {
+                // Quiz finished
+                alert('Quiz finished! Your score: ' + score);
+            }
+        }
+
+        // Event listener for submit button
+        submitButton.addEventListener('click', moveNext);
+        document.getElementById('feedback').textContent = '';
+
+        // Start the quiz
+        startQuiz();
+    </script>
+</body>
+</html>
